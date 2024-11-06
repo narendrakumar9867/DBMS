@@ -1,0 +1,64 @@
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Age INT,
+    Major VARCHAR(50)
+);
+
+CREATE TABLE Professors (
+    ProfessorID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Department VARCHAR(50)
+);
+
+CREATE TABLE Courses (
+    CourseID INT PRIMARY KEY,
+    CourseName VARCHAR(100),
+    ProfessorID INT,
+    Credits INT,
+    CONSTRAINT FK_Professor FOREIGN KEY (ProfessorID) REFERENCES Professors(ProfessorID)
+);
+
+CREATE TABLE Enrollments (
+    EnrollmentID INT PRIMARY KEY,
+    StudentID INT,
+    CourseID INT,
+    Semester VARCHAR(10),
+    Grade CHAR(1),
+    CONSTRAINT FK_Student FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
+    CONSTRAINT FK_Course FOREIGN KEY (CourseID) REFERENCES Courses(CourseID)
+);
+
+SELECT Students.Name AS StudentName, Courses.CourseName
+FROM Enrollments
+INNER JOIN Students ON Enrollments.StudentID = Students.StudentID
+INNER JOIN Courses ON Enrollments.CourseID = Courses.CourseID;
+
+SELECT Courses.CourseName, Students.Name AS StudentName
+FROM Courses
+LEFT JOIN Enrollments ON Courses.CourseID = Enrollments.CourseID
+LEFT JOIN Students ON Enrollments.StudentID = Students.StudentID;
+
+SELECT Students.Name AS StudentName, Courses.CourseName
+FROM Students
+RIGHT JOIN Enrollments ON Students.StudentID = Enrollments.StudentID
+RIGHT JOIN Courses ON Enrollments.CourseID = Courses.CourseID;
+
+SELECT CourseName
+FROM Courses
+WHERE CourseID IN (
+    SELECT CourseID
+    FROM Enrollments
+    GROUP BY CourseID
+    HAVING COUNT(StudentID) > 2
+);
+
+CREATE VIEW StudentCourseDetails AS
+SELECT Students.Name AS StudentName, Courses.CourseName, Professors.Name AS ProfessorName
+FROM Enrollments
+JOIN Students ON Enrollments.StudentID = Students.StudentID
+JOIN Courses ON Enrollments.CourseID = Courses.CourseID
+JOIN Professors ON Courses.ProfessorID = Professors.ProfessorID;
+
+SELECT * FROM StudentCourseDetails
+WHERE CourseName = 'Computer Science';
