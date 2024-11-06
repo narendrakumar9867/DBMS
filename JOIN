@@ -1,0 +1,71 @@
+CREATE DATABASE customer;
+USE customer;
+
+-- Create the customer_master table
+CREATE TABLE customer_master (
+    cust_no INT PRIMARY KEY,
+    fname VARCHAR(50),
+    lname VARCHAR(50)
+);
+
+-- Create the address_details table
+CREATE TABLE address_details (
+    cust_no INT,
+    add1 VARCHAR(100),
+    add2 VARCHAR(100),
+    state VARCHAR(50),
+    city VARCHAR(50),
+    pincode INT,
+    FOREIGN KEY (cust_no) REFERENCES customer_master(cust_no)
+);
+
+-- Create the acc_fixdeposite_cust_details table
+CREATE TABLE acc_fixdeposite_cust_details (
+    cust_no INT,
+    acc_fd_no INT PRIMARY KEY,
+    FOREIGN KEY (cust_no) REFERENCES customer_master(cust_no)
+);
+
+-- Create the fixdeposite_dets table
+CREATE TABLE fixdeposite_dets (
+    fd_sr_no INT PRIMARY KEY,
+    acc_fd_no INT,
+    amt DECIMAL(10, 2),
+    FOREIGN KEY (acc_fd_no) REFERENCES acc_fixdeposite_cust_details(acc_fd_no)
+);
+
+-- Insert sample data into customer_master
+INSERT INTO customer_master (cust_no, fname, lname) VALUES 
+(1, 'AAA', 'X'),
+(2, 'xyz', 'pqr'),
+(3, 'CCC', 'Z');
+
+-- Insert sample data into address_details
+INSERT INTO address_details (cust_no, add1, add2, state, city, pincode) VALUES 
+(1, '123 Main St', 'H 1', 'Maharashtra', 'Nagpur', 400001),
+(2, '456 Raj St', 'H 2', 'Karnataka', 'Bengaluru', 400002),
+(3, '786 Road', 'H 3', 'Maharashtra', 'Pune', 400003);
+
+-- Insert sample data into acc_fixdeposite_cust_details
+INSERT INTO acc_fixdeposite_cust_details (cust_no, acc_fd_no) VALUES 
+(1, 1001), (2, 1002), (3, 1003);
+
+-- Insert sample data into fixdeposite_dets
+INSERT INTO fixdeposite_dets (fd_sr_no, acc_fd_no, amt) VALUES 
+(1, 1001, 6000), (2, 1002, 4500), (3, 1003, 7000);
+
+
+-- Question 1 
+SELECT ad.add1, ad.add2, ad.state, ad.city, ad.pincode FROM address_details ad
+JOIN customer_master cm ON cm.cust_no = ad.cust_no
+WHERE cm.fname = 'xyz' AND cm.lname = 'pqr';
+
+-- Question 2
+SELECT cm.fname, cm.lname, fd.amt FROM customer_master cm
+JOIN acc_fixdeposite_cust_details acd ON cm.cust_no = acd.cust_no
+JOIN fixdeposite_dets fd ON fd.acc_fd_no = acd.acc_fd_no
+WHERE fd.amt > 5000;
+
+
+
+
