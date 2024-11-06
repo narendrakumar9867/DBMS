@@ -1,0 +1,30 @@
+CREATE DATABASE VIEW_1;
+USE VIEW_1;
+
+CREATE TABLE borrower (
+    borrower_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    loan_amount DECIMAL(10, 2),
+    loan_date DATE
+);
+
+INSERT INTO borrower (borrower_id, name, loan_amount, loan_date)
+VALUES (1, 'AAA', 10000.00, '2024-11-01'),(2, 'BBB', 25000.00, '2024-11-03'),(3, 'CCC', 15000.00, '2024-11-02');
+
+CREATE VIEW borrower_view AS
+SELECT borrower_id, loan_amount
+FROM borrower;
+
+INSERT INTO borrower_view (borrower_id, loan_amount)
+VALUES (4, 60000);
+select * from borrower_view;
+
+UPDATE borrower_view
+SET loan_amount = 12000
+WHERE borrower_id = 1;
+select * from borrower_view;
+
+DELETE FROM borrower_view
+WHERE borrower_id = 2;
+select * from borrower_view;
+
