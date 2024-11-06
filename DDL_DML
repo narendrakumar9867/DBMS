@@ -1,0 +1,121 @@
+CREATE DATABASE bank;
+USE bank;
+
+-- Table: branch
+CREATE TABLE branch (
+    branch_name VARCHAR(50) PRIMARY KEY,
+    branch_city VARCHAR(50) NOT NULL,
+    assets DECIMAL(15, 2) CHECK (assets >= 0)
+);
+
+-- Table: Account
+CREATE TABLE account (
+    acc_no INT PRIMARY KEY,
+    branch_name VARCHAR(50),
+    balance DECIMAL(15, 2) CHECK (balance >= 0),
+    FOREIGN KEY (branch_name) REFERENCES branch(branch_name)
+);
+
+-- Table: Customer
+CREATE TABLE customer (
+    cust_name VARCHAR(50) PRIMARY KEY,
+    cust_street VARCHAR(50) NOT NULL,
+    cust_city VARCHAR(50) NOT NULL
+);
+
+-- Table: Depositor
+CREATE TABLE depositor (
+    cust_name VARCHAR(50),
+    acc_no INT,
+    PRIMARY KEY (cust_name, acc_no),
+    FOREIGN KEY (cust_name) REFERENCES customer(cust_name),
+    FOREIGN KEY (acc_no) REFERENCES account(acc_no)
+);
+
+-- Table: Loan
+CREATE TABLE loan (
+    loan_no INT PRIMARY KEY,
+    branch_name VARCHAR(50),
+    amount DECIMAL(15, 2) CHECK (amount > 0),
+    FOREIGN KEY (branch_name) REFERENCES branch(branch_name)
+);
+
+-- Table: Borrower
+CREATE TABLE borrower (
+    cust_name VARCHAR(50),
+    loan_no INT,
+    PRIMARY KEY (cust_name, loan_no),
+    FOREIGN KEY (cust_name) REFERENCES customer(cust_name),
+    FOREIGN KEY (loan_no) REFERENCES loan(loan_no)
+);
+
+-- Insert values into branch
+INSERT INTO branch (branch_name, branch_city, assets) VALUES
+('Akurdi', 'Pune', 5000000),
+('Chinchwad', 'Pune', 8000000),
+('MG Road', 'Mumbai', 12000000);
+
+-- Insert values into account
+INSERT INTO account (acc_no, branch_name, balance) VALUES
+(1001, 'Akurdi', 15000),
+(1002, 'Chinchwad', 25000),
+(1003, 'Akurdi', 12000),
+(1004, 'MG Road', 30000),
+(1005, 'Chinchwad', 20000);
+
+-- Insert values into customer
+INSERT INTO customer (cust_name, cust_street, cust_city) VALUES
+('AAA', '123 Main St', 'Pune'),
+('BBB', '456 Raj St', 'Mumbai'),
+('CCC', '789 Apple St', 'Pune'),
+('DDD', '101 Mango St', 'Mumbai');
+
+-- Insert values into depositor
+INSERT INTO depositor (cust_name, acc_no) VALUES
+('AAA', 1001),
+('BBB', 1003),
+('CCC', 1002),
+('DDD', 1005);
+
+-- Insert values into loan
+INSERT INTO loan (loan_no, branch_name, amount) VALUES
+(2001, 'Akurdi', 13000),
+(2002, 'Akurdi', 25000),
+(2003, 'Chinchwad', 10000),
+(2004, 'MG Road', 18000),
+(2005, 'Akurdi', 14000);
+
+-- Insert values into borrower
+INSERT INTO borrower (cust_name, loan_no) VALUES
+('AAA', 2001),
+('CCC', 2002),
+('BBB', 2003),
+('DDD', 2004);
+
+-- Question 1
+SELECT loan_no
+FROM loan
+WHERE branch_name = 'Akurdi' AND amount > 12000;
+
+-- Question 2 
+SELECT c.cust_name, b.loan_no, l.amount
+FROM customer c
+JOIN borrower b ON c.cust_name = b.cust_name
+JOIN loan l ON b.loan_no = l.loan_no;
+
+-- Question 3
+SELECT cust_name FROM depositor
+UNION
+SELECT cust_name FROM borrower;
+
+-- Question 4
+DELETE FROM borrower
+WHERE loan_no IN (SELECT loan_no FROM loan WHERE amount BETWEEN 13000 AND 15000);
+
+DELETE FROM loan
+WHERE amount BETWEEN 13000 AND 15000;
+
+select * from loan;
+
+-- -- Question 5 
+-- CREATE SYNONYM cust FOR customer; 
