@@ -1,0 +1,78 @@
+{
+  "_id": ObjectId("..."),
+  "title": "1984",
+  "author": "George Orwell",
+  "year": 1949,
+  "genre": "Dystopian",
+  "available": true
+},
+{
+  "_id": ObjectId("..."),
+  "title": "Harry Potter and the Sorcerer's Stone",
+  "author": "J.K. Rowling",
+  "year": 1997,
+  "genre": "Fantasy",
+  "available": true
+},
+{
+  "_id": ObjectId("..."),
+  "title": "To Kill a Mockingbird",
+  "author": "Harper Lee",
+  "year": 1960,
+  "genre": "Fiction",
+  "available": false
+}
+
+// Insert a single book
+db.books.insertOne({
+    "title": "The Great Gatsby",
+    "author": "F. Scott Fitzgerald",
+    "year": 1925,
+    "genre": "Classic",
+    "available": true
+});
+
+// Insert multiple books
+db.books.insertMany([
+    {
+        "title": "The Catcher in the Rye",
+        "author": "J.D. Salinger",
+        "year": 1951,
+        "genre": "Fiction",
+        "available": true
+    },
+    {
+        "title": "Brave New World",
+        "author": "Aldous Huxley",
+        "year": 1932,
+        "genre": "Science Fiction",
+        "available": true
+    }
+]);
+
+db.books.find({});
+
+db.books.find({ "author": "George Orwell" });
+
+db.books.find({ "year": { $gt: 1950 } });
+
+db.books.find({
+    $or: [
+        { "genre": "Fantasy" },
+        { "genre": "Dystopian" }
+    ]
+});
+
+db.books.updateOne(
+    { "title": "1984" },
+    { $set: { "available": false } }
+);
+
+db.books.updateMany(
+    { "author": "Harper Lee" },
+    { $set: { "available": true } }
+);
+
+db.books.deleteOne({ "title": "To Kill a Mockingbird" });
+
+db.books.deleteMany({ "genre": "Dystopian" });
