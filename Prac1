@@ -1,0 +1,77 @@
+CREATE TABLE Authors (
+    AuthorID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Country VARCHAR(50)
+);
+
+CREATE TABLE Books (
+    BookID INT PRIMARY KEY,
+    Title VARCHAR(100) NOT NULL,
+    AuthorID INT,
+    Genre VARCHAR(50),
+    PublishedYear INT,
+    CONSTRAINT FK_Author FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID)
+);
+
+CREATE TABLE Members (
+    MemberID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    JoinDate DATE,
+    Email VARCHAR(100) UNIQUE
+);
+
+-- Creating an index for quick searching by book genre
+CREATE INDEX idx_genre ON Books(Genre);
+
+-- Creating a sequence to auto-generate Member IDs
+CREATE SEQUENCE MemberID_Seq START WITH 1 INCREMENT BY 1;
+
+-- Creating a synonym for easier access to the Members table
+CREATE SYNONYM LibMembers FOR Members;
+
+-- Inserting into Authors table
+INSERT INTO Authors (AuthorID, Name, Country)
+VALUES (1, 'George Orwell', 'UK');
+
+INSERT INTO Authors (AuthorID, Name, Country)
+VALUES (2, 'J.K. Rowling', 'UK');
+
+-- Inserting into Books table
+INSERT INTO Books (BookID, Title, AuthorID, Genre, PublishedYear)
+VALUES (1, '1984', 1, 'Dystopian', 1949);
+
+INSERT INTO Books (BookID, Title, AuthorID, Genre, PublishedYear)
+VALUES (2, 'Harry Potter and the Sorcerer''s Stone', 2, 'Fantasy', 1997);
+
+-- Inserting into Members table
+INSERT INTO Members (MemberID, Name, JoinDate, Email)
+VALUES (MemberID_Seq.NEXTVAL, 'Alice Smith', '2024-01-10', 'alice@example.com');
+
+-- Selecting all books by genre
+SELECT Title, Genre FROM Books WHERE Genre = 'Fantasy';
+
+-- Selecting all members who joined after 2023
+SELECT Name, JoinDate FROM Members WHERE JoinDate > '2023-01-01';
+
+-- Joining Books and Authors to list book titles with author names
+SELECT Books.Title, Authors.Name AS Author
+FROM Books
+JOIN Authors ON Books.AuthorID = Authors.AuthorID;
+
+-- Update a member's email address
+UPDATE Members
+SET Email = 'alice_new@example.com'
+WHERE Name = 'Alice Smith';
+
+-- Delete a book published before 1950
+DELETE FROM Books
+WHERE PublishedYear < 1950;
+
+-- Count how many books are in the library
+SELECT COUNT(*) AS BookCount FROM Books;
+
+-- Find the maximum published year of any book
+SELECT MAX(PublishedYear) AS LatestYear FROM Books;
+
+-- Concatenate the author’s name and country
+SELECT Name || ' from ' || Country AS AuthorInfo FROM Authors;
