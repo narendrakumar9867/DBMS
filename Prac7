@@ -1,0 +1,122 @@
+pip install mysql-connector-python
+
+CREATE TABLE Books (
+    BookID INT PRIMARY KEY AUTO_INCREMENT,
+    Title VARCHAR(100),
+    Author VARCHAR(100),
+    PublishedYear INT
+);
+
+
+import mysql.connector
+from tkinter import *
+from tkinter import messagebox
+
+# Establishing database connection
+def db_connect():
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="your_username",
+            password="your_password",
+            database="LibraryDB"
+        )
+        return conn
+    except mysql.connector.Error as err:
+        messagebox.showerror("Connection Error", f"Error: {err}")
+        return None
+
+# Function to add a new book
+def add_book():
+    conn = db_connect()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO Books (Title, Author, PublishedYear) VALUES (%s, %s, %s)",
+                       (title_entry.get(), author_entry.get(), year_entry.get()))
+        conn.commit()
+        messagebox.showinfo("Success", "Book added successfully!")
+        conn.close()
+        clear_entries()
+        view_books()
+
+# Function to delete a book
+def delete_book():
+    conn = db_connect()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Books WHERE BookID = %s", (book_id_entry.get(),))
+        conn.commit()
+        messagebox.showinfo("Success", "Book deleted successfully!")
+        conn.close()
+        clear_entries()
+        view_books()
+
+# Function to update a book
+def edit_book():
+    conn = db_connect()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE Books SET Title = %s, Author = %s, PublishedYear = %s WHERE BookID = %s",
+                       (title_entry.get(), author_entry.get(), year_entry.get(), book_id_entry.get()))
+        conn.commit()
+        messagebox.showinfo("Success", "Book updated successfully!")
+        conn.close()
+        clear_entries()
+        view_books()
+
+# Function to view all books
+def view_books():
+    conn = db_connect()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Books")
+        rows = cursor.fetchall()
+        book_list.delete(0, END)
+        for row in rows:
+            book_list.insert(END, row)
+        conn.close()
+
+# Clear input fields
+def clear_entries():
+    book_id_entry.delete(0, END)
+    title_entry.delete(0, END)
+    author_entry.delete(0, END)
+    year_entry.delete(0, END)
+
+# GUI setup using Tkinter
+root = Tk()
+root.title("Library Database Management")
+root.geometry("500x400")
+
+# Labels and entry fields for book details
+Label(root, text="Book ID").grid(row=0, column=0, padx=10, pady=10)
+book_id_entry = Entry(root)
+book_id_entry.grid(row=0, column=1)
+
+Label(root, text="Title").grid(row=1, column=0, padx=10, pady=10)
+title_entry = Entry(root)
+title_entry.grid(row=1, column=1)
+
+Label(root, text="Author").grid(row=2, column=0, padx=10, pady=10)
+author_entry = Entry(root)
+author_entry.grid(row=2, column=1)
+
+Label(root, text="Published Year").grid(row=3, column=0, padx=10, pady=10)
+year_entry = Entry(root)
+year_entry.grid(row=3, column=1)
+
+# Buttons for CRUD operations
+Button(root, text="Add Book", command=add_book).grid(row=4, column=0, pady=10)
+Button(root, text="Delete Book", command=delete_book).grid(row=4, column=1, pady=10)
+Button(root, text="Edit Book", command=edit_book).grid(row=5, column=0, pady=10)
+Button(root, text="View All Books", command=view_books).grid(row=5, column=1, pady=10)
+
+# Listbox to display books
+book_list = Listbox(root, width=50)
+book_list.grid(row=6, column=0, columnspan=2, pady=10)
+
+# Initial call to display books
+view_books()
+
+# Run the Tkinter event loop
+root.mainloop()
