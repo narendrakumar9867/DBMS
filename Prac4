@@ -1,0 +1,47 @@
+DELIMITER $$
+CREATE PROCEDURE UpdateFines()
+BEGIN
+DECLARE bor_roll INT;
+DECLARE bor_date DATE;
+DECLARE total_days INT;
+DECLARE total_fine INT;
+DECLARE st CHAR(1);
+DECLARE done BOOLEAN DEFAULT FALSE;
+DECLARE cur CURSOR FOR SELECT roll_no, dateofissue, status from borrower;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+OPEN cur;
+TRUNCATE TABLE fine;
+read_loop: LOOP
+FETCH cur into bor_roll, bor_date, st;
+IF done THEN
+LEAVE read_loop;
+END IF;
+SET total_fine = 0;
+SET total_days = DATEDIFF(CURDATE(), bor_date);
+IF st = 'N' THEN
+IF total_days > 15 THEN
+IF total_days BETWEEN 16 AND 30 THEN
+SET total_fine = (total_days) * 5;
+ELSE
+SET total_fine = (15 * 5) + (total_days - 30) * 50;
+END IF;
+END IF;
+END IF;
+INSERT INTO fine VALUES (bor_roll, CURDATE(), total_fine);
+END LOOP;
+CLOSE cur;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE ReturnBook(IN roll INT)
+BEGIN
+IF EXISTS (SELECT 1 FROM fine WHERE roll_no = roll) THEN
+UPDATE borrower SET status = 'R' WHERE roll_no = roll;
+DELETE FROM fine WHERE roll_no = roll;
+SELECT 'Book Returned Successfully' AS Message;
+ELSE
+SIGNAL SQLSTATE '46000' SET MESSAGE_TEXT = 'Roll Number Not Found!';
+END IF;
+END $$
+DELIMITER ;
